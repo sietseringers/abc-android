@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+apply plugin: 'maven'
+
+version="0.1"
+group="net.sietseringers"
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.1.1'
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://credentials.github.io/repos/maven2/"
+    }
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion '21.1.2'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jni.srcDirs = [] //disable automatic ndk-build call
+        }
+    }
+
+    defaultConfig {
+        ndk {
+            moduleName "jpbc-pbc"
+            abiFilter "armeabi-v7a"
+            cFlags "-DANDROID_NDK"
+            stl "stlport_static"
+        }
+    }
+
+    lintOptions {
+        // BCProv references javax.naming
+        // CredentialsAPI references java.awt and java.swing
+        disable 'InvalidPackage'
+    }
+}
+
+// call regular ndk-build(.cmd) script from app directory
+task ndkBuild(type: Exec) {
+    commandLine 'ndk-build', '-C', file('jni').absolutePath
+}
+
+tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn ndkBuild
+}
+
+dependencies {
+    compile 'net.sietseringers:abc:0.1'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
