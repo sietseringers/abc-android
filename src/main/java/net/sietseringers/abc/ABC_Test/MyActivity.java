@@ -34,6 +34,16 @@ public class MyActivity extends Activity {
 		DescriptionStore.setTreeWalker(aw);
 
 		try {
+			// Obtained libjnidispatch.so from building JNA, https://github.com/twall/jna
+			// see jna/www/AndroidDevelopmentEnvironment.md
+			// (https://github.com/twall/jna/blob/master/www/AndroidDevelopmentEnvironment.md)
+
+			// Obtained GMP from https://github.com/Rupan/gmp
+
+			// JPBC-PBC is just the original PBC renamed, plus two source files adding functions
+			// that JPBC's wrapper uses. See commit afb1452 in the jpbc-pbc submodule.
+			// Obtained .so files of GMP and JPBC-PBC by building them using ndk-build.
+
 			System.loadLibrary("gmp");
 			System.loadLibrary("jnidispatch");
 			System.loadLibrary("jpbc-pbc");
