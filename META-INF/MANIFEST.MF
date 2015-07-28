@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.4
+Created-By: 1.6.0_45-b06-451-10M4406 (Apple Inc.)
+Implementation-Version: 4.0.0 b4
+Specification-Version: 4.0.0
+
