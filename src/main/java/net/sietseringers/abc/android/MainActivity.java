@@ -1,14 +1,11 @@
-package net.sietseringers.abc.ABC_Test;
+package net.sietseringers.abc.android;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.TextView;
 import it.unisa.dia.gas.jpbc.Pairing;
-import it.unisa.dia.gas.jpbc.PairingParameters;
-import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
-import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
-import it.unisa.dia.gas.plaf.jpbc.pbc.PBCPairingFactory;
 import net.sietseringers.abc.*;
+import net.sietseringers.abc.android.R;
 import net.sietseringers.abc.issuance.CommitmentIssuanceMessage;
 import net.sietseringers.abc.issuance.FinishIssuanceMessage;
 import net.sietseringers.abc.issuance.RequestIssuanceMessage;
@@ -17,11 +14,11 @@ import org.irmacard.credentials.Attributes;
 import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.DescriptionStore;
 import org.irmacard.credentials.info.VerificationDescription;
+import org.w3c.dom.Text;
 
-import java.io.File;
 import java.util.Arrays;
 
-public class MyActivity extends Activity {
+public class MainActivity extends Activity {
 	/**
 	 * Called when the activity is first created.
 	 */
@@ -33,34 +30,34 @@ public class MyActivity extends Activity {
 		AndroidWalker aw = new AndroidWalker(getResources().getAssets());
 		DescriptionStore.setTreeWalker(aw);
 
+		String text = "";
+		TextView textView = (TextView) findViewById(R.id.textview);
+
 		try {
-			// Obtained libjnidispatch.so from building JNA, https://github.com/twall/jna
-			// see jna/www/AndroidDevelopmentEnvironment.md
-			// (https://github.com/twall/jna/blob/master/www/AndroidDevelopmentEnvironment.md)
-
-			// Obtained GMP from https://github.com/Rupan/gmp
-
-			// JPBC-PBC is just the original PBC renamed, plus two source files adding functions
-			// that JPBC's wrapper uses. See commit afb1452 in the jpbc-pbc submodule.
-			// Obtained .so files of GMP and JPBC-PBC by building them using ndk-build.
-
-			System.loadLibrary("gmp");
-			System.loadLibrary("jnidispatch");
-			System.loadLibrary("jpbc-pbc");
-
-			test();
+			net.sietseringers.androidpbc.AndroidPBC.Initialize();
+			textView.setText(test());
 		} catch (Exception e) {
-			e.printStackTrace();
+			textView.setTextColor(getResources().getColor(R.color.red));
+			textView.setText(e.toString());
 		}
 	}
 
-	public void test() throws Exception {
-		Pairing e = SystemParameters.e;
+	public String test() throws Exception {
+		StringBuilder sb = new StringBuilder();
+
 		long start;
 		long stop;
 
+		start = System.currentTimeMillis();
+		Pairing e = SystemParameters.e;
+		stop = System.currentTimeMillis();
+		sb.append("Instantiated pairing in ").append(stop - start).append(" ms\n");
+
 		// Generate a new private/public keypair
+		start = System.currentTimeMillis();
 		PrivateKey sk = new PrivateKey(6);
+		stop = System.currentTimeMillis();
+		sb.append("Created private key in ").append(stop - start).append(" ms\n");
 
 		// Load the "agelower" CredentialDescription from the store
 		// Setup the DescriptionStore
@@ -87,21 +84,23 @@ public class MyActivity extends Activity {
 
 		Credentials card = new Credentials();
 		card.set(agelower, c);
-		System.out.println(card.getAttributes(agelower).toString());
 		stop = System.currentTimeMillis();
-		System.out.println("Issuing: " + (stop-start) + " ms");
+		sb.append("Issuing took ").append(stop - start)
+				.append(" ms\n\nAttributes in credential:\n")
+				.append(card.getAttributes(agelower).toString()).append("\n\n");
 
 		// Create a disclosure proof
 		start = System.currentTimeMillis();
 		ProofD proof = c.getDisclosureProof(Util.generateNonce(), Arrays.asList(1, 2, 3));
 		stop = System.currentTimeMillis();
-		System.out.println("Disclosing: " + (stop-start) + " ms");
+		sb.append("Disclosing took ").append(stop - start).append(" ms\n");
 
 		// Verify it directly
 		start = System.currentTimeMillis();
-		System.out.println(proof.isValid(sk.publicKey));
+		sb.append("Proof validity: ")
+				.append(proof.isValid(sk.publicKey)).append("\n");
 		stop = System.currentTimeMillis();
-		System.out.println("Verify 1: " + (stop-start) + " ms");
+		sb.append("Verify 1 took ").append(stop - start).append(" ms\n\n");
 
 		// Verify it and return the contained attributes using a VerificationDescription
 		start = System.currentTimeMillis();
@@ -109,8 +108,10 @@ public class MyActivity extends Activity {
 				.getVerificationDescriptionByName("IRMATube", "ageLowerOver18");
 		proof = c.getDisclosureProof(vd, Util.generateNonce());
 		Attributes disclosed = proof.verify(vd, sk.publicKey);
-		System.out.println(disclosed.toString());
+		sb.append("Disclosed attributes: \n").append(disclosed.toString()).append("\n\n");
 		stop = System.currentTimeMillis();
-		System.out.println("Verify 2: " + (stop-start) + " ms");
+		sb.append("Verify 2 took ").append(stop - start).append(" ms\n");
+
+		return sb.toString();
 	}
 }

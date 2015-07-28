@@ -17,7 +17,7 @@
  * Copyright (C) Wouter Lueks, Radboud University Nijmegen, Februari 2013.
  */
 
-package net.sietseringers.abc.ABC_Test;
+package net.sietseringers.abc.android;
 
 import java.io.BufferedReader;
 import java.io.IOException;
