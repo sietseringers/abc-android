@@ -32,11 +32,17 @@ android {
             assets.srcDirs = ['assets']
         }
     }
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+    }
 }
 
 dependencies {
+    compile group: 'junit', name: 'junit', version: '4.11'
     compile 'net.sietseringers:android-pbc:0.1'
     compile 'net.sietseringers:abc:0.1'
+    compile 'net.sietseringers:abc:0.1:test'
 }
 
 task wrapper(type: Wrapper) {
