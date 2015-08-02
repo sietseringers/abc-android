@@ -22,6 +22,7 @@ package net.sietseringers.abc.android;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
 import it.unisa.dia.gas.jpbc.Pairing;
 import net.sietseringers.abc.*;
@@ -56,6 +57,10 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		// Make scrollable
+		TextView textView = (TextView) findViewById(R.id.textview);
+		textView.setMovementMethod(new ScrollingMovementMethod());
+
 		// Streams for capturing the test output
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 		PrintStream out = new PrintStream(byteStream, true);
@@ -75,7 +80,6 @@ public class MainActivity extends Activity {
 		}
 
 		String text = new String(byteStream.toByteArray());
-		TextView textView = (TextView) findViewById(R.id.textview);
 		textView.setText(text);
 	}
 }
